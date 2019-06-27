@@ -1,5 +1,7 @@
-
-from math import exp
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import random
 
 dmin = 1
 dmax = 2
@@ -30,10 +32,10 @@ def get_A(dpt):
                 A[i][j] = 1
     return A
 
-def get_dpt(pattern):
+def get_pos(pattern):
     # 1.由pattern生成等高线
     # 2.在等高线上采样生成机器人坐标pos
-    # 3.计算每个机器人到target的距离
+   
     x = np.arange(-1.5,3.5,0.1)
     y = np.arange(-1.5,3.5,0.1)
     X, Y = np.meshgrid(x,y)
@@ -41,16 +43,30 @@ def get_dpt(pattern):
     N = np.arange(-0.2, 1.5, 0.1)
     CS = plt.contour( Z, N, linewidth=2, cmap = mpl.cm.jet )
     # plt.show()
-    CS.
+    path = CS.collections[10].get_paths()[10]
+    vertices = path.vertices
+    px = vertices[:,0]
+    py = vertices[:,1]
+    p_pos = []
+    for i, j in px, py:
+        p_pos.append(zip(i, j))
+    return p_pos
 
-def get_dpo(dpt):
-    pass
+# 计算每个机器人到target的距离
+def get_dpt(pos):
+    dpt = [ math.sqrt((tx-px)**2+(ty-py)**2)  for tx, ty in target for px, py in pos]
+    return dpt
+
+# 计算每个机器人到obstacle的距离
+def get_dpo(pos):
+    dpo = [ math.sqrt((ox-px)**2+(oy-py)**2)  for ox, oy in obstacle for px, py in pos]
+    return dpo
 
 def get_domin(dpo):
     return min( map(min,dpo) )
 
 def sigmoid(x,a,k):
-    return 1/(1+exp(-k*(x-a)))
+    return 1/(1+np.exp(-k*(x-a)))
 
 def fitness(k, pattern):
     """
